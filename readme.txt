@@ -6,3 +6,4 @@ Tested up to: 6.2
 This is a plugin for woocommerce product sorting depend on product discount percentage.
 == Description ==
 
+Thanks! 
