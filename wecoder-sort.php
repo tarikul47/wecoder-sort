@@ -79,3 +79,49 @@ function custom_product_column_orderby($query)
 		$query->set('orderby', 'meta_value_num');
 	}
 }
+
+// Add custom sorting option
+add_filter('woocommerce_catalog_orderby', 'add_custom_sorting_option');
+function add_custom_sorting_option($sorting_options)
+{
+	$sorting_options['discount_percentage_asc'] = 'Sort by Discount Percentage (Low to High)';
+	$sorting_options['discount_percentage_desc'] = 'Sort by Discount Percentage (High to Low)';
+	return $sorting_options;
+}
+
+// Modify product query to enable sorting by custom column and direction
+add_filter('woocommerce_get_catalog_ordering_args', 'custom_sort_by_discount_percentage');
+function custom_sort_by_discount_percentage($args)
+{
+	if (isset($_GET['orderby']) && 'discount_percentage_asc' == $_GET['orderby']) {
+		$args['meta_key'] = 'discount_percentage';
+		$args['orderby'] = 'meta_value_num';
+		$args['order'] = 'asc';
+	} elseif (isset($_GET['orderby']) && 'discount_percentage_desc' == $_GET['orderby']) {
+		$args['meta_key'] = 'discount_percentage';
+		$args['orderby'] = 'meta_value_num';
+		$args['order'] = 'desc';
+	}
+	return $args;
+}
+
+
+/**
+ * We can see product percentage on product 
+ */
+
+function wecoder_woocommerce_sale_flash($content)
+{
+	global $product;
+	if (empty($product->sale_price)) {
+		return $content;
+	}
+	$product_id = $product->id;
+	$discount = get_post_meta($product_id, 'discount_percentage', true);
+	$content = <<<EOD
+	<span class="onsale">$discount%</span>
+EOD;
+
+	return $content;
+}
+add_filter('woocommerce_sale_flash', 'wecoder_woocommerce_sale_flash');
